@@ -69,9 +69,6 @@ var (
 	// iconVPN is the TUN: a globe of network nodes.
 	iconVPN = icon(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4a8 8 0 1 0 8 8a8.003 8.003 0 0 0-8-8m-6 8a6 6 0 0 1 .105-1.095L9.6 14.4v.8a1.605 1.605 0 0 0 1.6 1.6v1.14A6.004 6.004 0 0 1 6 12m9.2 3.2h-.8v-2.4a.8.8 0 0 0-.8-.8H8.8v-1.6h1.6a.8.8 0 0 0 .8-.8V8h1.6a1.6 1.6 0 0 0 1.59-1.5a5.985 5.985 0 0 1 2.137 9.426A1.57 1.57 0 0 0 15.2 15.2M13 1a1 1 0 1 1-1-1a1 1 0 0 1 1 1m5 1a1 1 0 1 1-1-1a1 1 0 0 1 1 1m4 4a1 1 0 1 1-1-1a1 1 0 0 1 1 1m2 6a1 1 0 1 1-1-1a1 1 0 0 1 1 1m-2 6a1 1 0 1 1-1-1a1 1 0 0 1 1 1m-4 4a1 1 0 1 1-1-1a1 1 0 0 1 1 1m-5 1a1 1 0 1 1-1-1a1 1 0 0 1 1 1m-5-1a1 1 0 1 1-1-1a1 1 0 0 1 1 1m-4-4a1 1 0 1 1-1-1a1 1 0 0 1 1 1m-2-6a1 1 0 1 1-1-1a1 1 0 0 1 1 1m2-6a1 1 0 1 1-1-1a1 1 0 0 1 1 1m4-4a1 1 0 1 1-1-1a1 1 0 0 1 1 1"/></svg>`)
 
-	// iconBolt is the lightning bolt.
-	iconBolt = icon(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" ` + glyphStroke + `><path d="M14.5 2.8 L5 13.7 L11.2 13.7 L9.5 21.2 L19 10.3 L12.8 10.3 Z"/></svg>`)
-
 	// iconSliders is the settings.
 	iconSliders = icon(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" ` + glyphStroke + `><path d="M3.2 5.5 L10.4 5.5M18.6 5.5 L20.8 5.5"/><circle cx="14.5" cy="5.5" r="2.5"/><path d="M3.2 12 L4.4 12M12.6 12 L20.8 12"/><circle cx="8.5" cy="12" r="2.5"/><path d="M3.2 18.5 L11.4 18.5M19.6 18.5 L20.8 18.5"/><circle cx="15.5" cy="18.5" r="2.5"/></svg>`)
 

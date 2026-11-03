@@ -129,6 +129,7 @@ func TestRenderMarks(t *testing.T) {
 		proxies: proxies,
 		groups:  []engine.ProxyGroupView{group},
 		delays:  map[string]int{},
+		testing: map[string]bool{group.All[1]: true},
 	}
 	img2 := mu.Render(func(c *mu.Context) {
 		mu.Column(c).FillWidth().Background(p.Page).Children(func() {

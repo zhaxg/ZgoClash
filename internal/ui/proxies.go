@@ -170,32 +170,31 @@ func (u *UI) nodeCard(c *mu.Context, p palette, g engine.ProxyGroupView, name st
 				mu.Text(c, withFlag(name)).FontSize(12.5).Font(emojiFamily).TextColor(p.Text).SingleLine()
 				mu.Text(c, proxy.Type).FontSize(10).TextColor(p.Muted)
 			})
-			// The mark of the node in use, above the delay and the button
-			// that tests it. It keeps its place when another node is the
-			// one in use, so the cards do not shift.
-			mu.Column(c).Gap(2).AlignItems(mu.Center).Children(func() {
+			// The mark of the node in use, above the delay. It keeps its
+			// place when another node is the one in use, so the cards do
+			// not shift.
+			mu.Column(c).Gap(2).AlignItems(mu.End).Children(func() {
 				mark := p.Mark
 				if !selected {
 					mark = mu.RGBA(0, 0, 0, 0)
 				}
-				mu.Icon(c, iconCheckCircle).FontSize(16).TextColor(mark)
-				mu.Row(c).Gap(6).AlignItems(mu.Center).Children(func() {
+				mu.Icon(c, iconCheckCircle).FontSize(23).TextColor(mark)
+				// The delay is the button that tests the node.
+				test := mu.ButtonBase(c).Padding(2, 6).Radius(6).Label("测试 " + name).
+					Tooltip("测试延迟").Children(func() {
 					if testing {
-						mu.Spinner(c)
+						loadingDots(c, p.Muted)
 					} else {
-						mu.Text(c, formatDelay(delay)).FontSize(11).Bold().TextColor(delayColor(p, delay)).NoWrap()
-					}
-					test := mu.ButtonBase(c).Size(22, 22).Radius(6).AlignItems(mu.Center).Justify(mu.Center).
-						Label("测试 " + name).Tooltip("测试延迟").Children(func() {
-						mu.Icon(c, iconBolt).FontSize(12).TextColor(p.Muted)
-					})
-					if test.Hovered() {
-						test.Background(p.Soft)
-					}
-					if test.Clicked() {
-						u.testNode(name)
+						mu.Text(c, formatDelay(delay)).FontSize(11).Bold().FixedLineHeight(delayLineHeight).
+							TextColor(delayColor(p, delay)).NoWrap()
 					}
 				})
+				if test.Hovered() {
+					test.Background(p.Soft)
+				}
+				if test.Clicked() {
+					u.testNode(name)
+				}
 			})
 		})
 	})

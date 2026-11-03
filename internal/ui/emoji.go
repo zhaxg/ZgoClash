@@ -30,11 +30,26 @@ func isRegional(r rune) bool {
 	return r >= 0x1F1E6 && r <= 0x1F1FF
 }
 
-// hasFlagRune reports whether s holds a regional indicator pair, i.e. a flag
-// emoji.
-func hasFlagRune(s string) bool {
+// isEmoji reports whether r is part of an emoji: a pictograph, a dingbat, a
+// transport symbol or a regional indicator.
+func isEmoji(r rune) bool {
+	switch {
+	case r >= 0x1F000 && r <= 0x1FAFF: // pictographs, flags and transport
+		return true
+	case r >= 0x2600 && r <= 0x27BF: // misc symbols and dingbats
+		return true
+	case r >= 0x2B00 && r <= 0x2BFF: // arrows and other marks
+		return true
+	case r == 0xFE0F: // the emoji variation selector
+		return true
+	}
+	return false
+}
+
+// hasEmojiRune reports whether s holds an emoji of any kind.
+func hasEmojiRune(s string) bool {
 	for _, r := range s {
-		if isRegional(r) {
+		if isEmoji(r) {
 			return true
 		}
 	}
@@ -98,9 +113,11 @@ var flagRules = []struct {
 }
 
 // flagFor returns the flag of the country a proxy name belongs to, if it can
-// tell. A name that already holds a flag is treated as flagged.
+// tell. A name that already carries an emoji is marked by whoever wrote it,
+// with the flag of its country or with another mark of its kind, so the app
+// leaves it alone.
 func flagFor(name string) string {
-	if hasFlagRune(name) {
+	if hasEmojiRune(name) {
 		return ""
 	}
 	// Names separate their codes with -, _ or . alike (HK-01, GB_HK_01),
