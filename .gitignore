@@ -1,0 +1,7 @@
+# The build output and the development build.
+bin/
+bin-dist/
+.mygo/
+
+# The render tests write their pictures next to the code.
+internal/ui/*_test.png
