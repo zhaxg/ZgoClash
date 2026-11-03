@@ -3,6 +3,8 @@ package app
 import (
 	"errors"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -106,8 +108,26 @@ func buildRuntimeConfig(profile []byte, st Settings, controllerPort int, secret 
 	if err != nil {
 		return nil, nil, err
 	}
+	out = yamlWideRunes(out)
 	if len(strings.TrimSpace(string(out))) == 0 {
 		return nil, nil, errors.New("配置文件为空")
 	}
 	return out, groups, nil
+}
+
+// wideRune finds the escapes of the characters YAML cannot print: the
+// library writes every emoji, a flag among them, as \U0001F1ED.
+var wideRune = regexp.MustCompile(`\\U([0-9A-Fa-f]{8})`)
+
+// yamlWideRunes turns those escapes back into the characters they stand
+// for, so the flags of the names stay flags in the file the core reads and
+// in the one the interface shows.
+func yamlWideRunes(out []byte) []byte {
+	return wideRune.ReplaceAllFunc(out, func(esc []byte) []byte {
+		n, err := strconv.ParseUint(string(esc[2:]), 16, 32)
+		if err != nil || n < 0x10000 || n > 0x10FFFF {
+			return esc
+		}
+		return []byte(string(rune(n)))
+	})
 }
