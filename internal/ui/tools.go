@@ -25,7 +25,6 @@ func (u *UI) toolsPage(c *mu.Context, snap app.Snapshot, p palette) {
 			mu.Box(c).Height(10)
 		})
 	})
-	u.configModal(c, p)
 }
 
 func (u *UI) section(c *mu.Context, p palette, title, desc string, body func()) {
@@ -174,7 +173,7 @@ func (u *UI) networkSection(c *mu.Context, snap app.Snapshot, p palette) {
 			mu.Row(c).Gap(12).AlignItems(mu.Center).Children(func() {
 				input := mu.TextInput(c.Key("controller-port"), &u.controllerText).Width(92)
 				external := snap.Settings.ControllerExternal
-				toggle := mu.Switch(c, &external)
+				toggle := mu.Switch(c, &external).Label("允许外部连接")
 				if toggle.Changed() || input.Submitted() {
 					u.saveControllerPort(external)
 				}
@@ -262,38 +261,6 @@ func (u *UI) coreSection(c *mu.Context, snap app.Snapshot, p palette) {
 			if mu.Button(c, "打开数据目录").Clicked() {
 				u.run("open-dir", func() error { return u.ctrl.OpenDataDir() }, nil)
 			}
-			if mu.Button(c, "运行时配置").Clicked() {
-				u.openConfig()
-			}
-		})
-	})
-}
-
-func (u *UI) openConfig() {
-	u.run("config", func() error {
-		text, err := u.ctrl.RuntimeConfig()
-		if err != nil {
-			return err
-		}
-		u.win.Update(func() {
-			u.configText = text
-			u.configOpen = true
-		})
-		return nil
-	}, nil)
-}
-
-func (u *UI) configModal(c *mu.Context, p palette) {
-	mu.Modal(c, &u.configOpen, func() {
-		mu.Column(c).Width(720).Gap(10).Children(func() {
-			mu.Text(c, "运行时配置").FontSize(17).Bold()
-			mu.Text(c, "这是核心实际加载的 YAML，包含应用覆盖后的设置。").FontSize(11.5).TextColor(p.Muted)
-			mu.TextArea(c.Key("runtime-config"), &u.configText).Height(430).ReadOnly(true).Font("monospace")
-			mu.Row(c).Justify(mu.End).Children(func() {
-				if mu.PrimaryButton(c, "关闭").Clicked() {
-					u.configOpen = false
-				}
-			})
 		})
 	})
 }

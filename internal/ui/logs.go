@@ -78,7 +78,7 @@ func (u *UI) logsPage(c *mu.Context, _ app.Snapshot, p palette) {
 						mu.Row(c).Gap(8).AlignItems(mu.Start).Children(func() {
 							mu.Text(c, timeText).FontSize(10).TextColor(p.Muted).Width(56)
 							mu.Text(c, strings.ToUpper(line.Level)).FontSize(9.5).TextColor(color).Width(52)
-							mu.Text(c, line.Payload).FontSize(10.5).Font("monospace").TextColor(p.Text).Grow(1)
+							mu.Text(c, line.Payload).FontSize(10.5).Font(monoFamily).TextColor(p.Text).Grow(1)
 						})
 					}
 				})

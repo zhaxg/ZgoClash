@@ -9,6 +9,7 @@ import (
 
 	"github.com/egoist/mygo"
 	mu "github.com/egoist/mygo/ui"
+	"github.com/egoist/mygo/ui/editor"
 
 	"zgo-clash/internal/app"
 	"zgo-clash/internal/engine"
@@ -96,6 +97,7 @@ type UI struct {
 	logReady       bool
 	configOpen     bool
 	configText     string
+	configState    *editor.State
 
 	sidebarExpanded bool
 	prevPage        int
@@ -482,7 +484,7 @@ func (u *UI) switchRow(c *mu.Context, p palette, title, desc string, on, enabled
 			}
 		})
 		v := on
-		if mu.Switch(c, &v).Disabled(!enabled).Changed() && enabled {
+		if mu.Switch(c, &v).Label(title).Disabled(!enabled).Changed() && enabled {
 			cb(v)
 		}
 		for _, t := range trailing {

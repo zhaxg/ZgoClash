@@ -137,7 +137,7 @@ func (u *UI) connectionRow(c *mu.Context, p palette, cn engine.Connection, compa
 			}
 		})
 		if !compact {
-			mu.Text(c, chain).FontSize(11).TextColor(p.Muted).Width(170).SingleLine()
+			mu.Text(c, chain).FontSize(11).Font(emojiFamily).TextColor(p.Muted).Width(170).SingleLine()
 			mu.Text(c, cn.Metadata.Network).FontSize(11).TextColor(p.Muted).Width(64)
 		}
 		mu.Text(c, formatBytes(cn.Upload)).FontSize(11).TextColor(p.Muted).Width(80)
@@ -225,7 +225,7 @@ func (u *UI) connectionModals(c *mu.Context, p palette) {
 func detailLine(c *mu.Context, p palette, label, value string) {
 	mu.Row(c).Gap(12).Children(func() {
 		mu.Text(c, label).FontSize(11).TextColor(p.Muted).Width(88)
-		mu.Text(c, value).FontSize(11.5).TextColor(p.Text).Grow(1).Selectable()
+		mu.Text(c, value).FontSize(11.5).Font(emojiFamily).TextColor(p.Text).Grow(1).Selectable()
 	})
 }
 

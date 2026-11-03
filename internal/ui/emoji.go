@@ -15,6 +15,12 @@ import (
 // hide digits, which it maps to blank keycap components.
 const emojiFamily = "system-ui, Twemoji Mozilla"
 
+// monoFamily draws text in the monospace font and falls back to the colour
+// emoji font behind it. Without the fallback a flag is drawn as the letters
+// of its country code, because the monospace font has glyphs for the
+// regional indicators.
+const monoFamily = "monospace, " + emojiFamily
+
 var fontsOnce sync.Once
 
 // ensureFonts makes sure the colour emoji font is available before the

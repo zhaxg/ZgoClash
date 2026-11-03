@@ -6,6 +6,7 @@ import (
 	"time"
 
 	mu "github.com/egoist/mygo/ui"
+	"github.com/egoist/mygo/ui/editor"
 
 	"zgo-clash/internal/app"
 )
@@ -53,6 +54,7 @@ func (u *UI) profilesPage(c *mu.Context, snap app.Snapshot, p palette) {
 		}
 	})
 	u.profileModals(c, p)
+	u.configModal(c, p)
 }
 
 func (u *UI) profileCard(c *mu.Context, p palette, snap app.Snapshot, prof app.Profile) {
@@ -68,7 +70,7 @@ func (u *UI) profileCard(c *mu.Context, p palette, snap app.Snapshot, prof app.P
 			mu.Column(c).Gap(5).Grow(1).Children(func() {
 				mu.Row(c).Gap(10).AlignItems(mu.Center).Children(func() {
 					mu.Row(c).Gap(7).AlignItems(mu.Center).Grow(1).Children(func() {
-						mu.Text(c, prof.Name).FontSize(15).Bold().SingleLine()
+						mu.Text(c, prof.Name).FontSize(15).Bold().SingleLine().Font(emojiFamily)
 						typeName := "手动"
 						switch prof.Type {
 						case "url":
@@ -94,6 +96,9 @@ func (u *UI) profileCard(c *mu.Context, p palette, snap app.Snapshot, prof app.P
 							u.editURL = prof.URL
 							u.editIsURL = prof.Type == "url"
 							u.editOpen = true
+						}
+						if m.Item("查看").Chosen() {
+							u.openConfig(prof.ID)
 						}
 						if m.Item("导出").Chosen() {
 							u.exportProfile(prof.ID)
@@ -137,6 +142,62 @@ func (u *UI) profileCard(c *mu.Context, p palette, snap app.Snapshot, prof app.P
 				u.useProfile(prof.ID)
 			}
 		}
+	})
+}
+
+// openConfig shows the configuration of a profile in the editor: the
+// runtime one the core loaded for the profile in use, the file it was
+// fetched from for the others.
+func (u *UI) openConfig(id string) {
+	u.run("config", func() error {
+		var text string
+		var err error
+		if id == u.ctrl.Snapshot().CurrentProfileID {
+			text, err = u.ctrl.RuntimeConfig()
+		} else {
+			text, err = u.ctrl.ProfileContent(id)
+		}
+		if err != nil {
+			return err
+		}
+		u.win.Update(func() {
+			u.configText = text
+			u.configState = newConfigEditor(text)
+			u.configOpen = true
+		})
+		return nil
+	}, nil)
+}
+
+// newConfigEditor makes the editor that shows a configuration: the YAML of
+// it, with the folds of the gutter and the numbers of the lines. The font
+// falls back to the colour emoji font, or a flag would be drawn as the
+// letters of its country code.
+func newConfigEditor(text string) *editor.State {
+	buf := editor.NewBuffer(text)
+	buf.SetLanguage(editor.LanguageFor("config.yaml"))
+	return &editor.State{
+		Buffer:     buf,
+		ReadOnly:   true,
+		Font:       mu.Font{Family: monoFamily, Size: 11.5},
+		WrapGuides: []int{100},
+	}
+}
+
+// configModal shows the configuration of a profile in a code editor, whose
+// folds hide the long lists away.
+func (u *UI) configModal(c *mu.Context, p palette) {
+	mu.Modal(c, &u.configOpen, func() {
+		mu.Column(c).Width(820).Height(600).Gap(10).Children(func() {
+			mu.Text(c, "运行时配置").FontSize(17).Bold()
+			mu.Text(c, "这是核心实际加载的 YAML，包含应用覆盖后的设置。").FontSize(11.5).TextColor(p.Muted)
+			editor.View(c, u.configState).Grow(1).FillWidth()
+			mu.Row(c).Justify(mu.End).Children(func() {
+				if mu.PrimaryButton(c, "关闭").Clicked() {
+					u.configOpen = false
+				}
+			})
+		})
 	})
 }
 

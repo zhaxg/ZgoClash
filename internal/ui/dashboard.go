@@ -531,7 +531,7 @@ func (u *UI) takeoverTile(c *mu.Context, snap app.Snapshot, p palette, systemPro
 			mu.Text(c, sub).FontSize(10).TextColor(p.Muted).SingleLine()
 		})
 		v := on
-		if mu.Switch(c, &v).Disabled(!enabled).Changed() && enabled {
+		if mu.Switch(c, &v).Label(title).Disabled(!enabled).Changed() && enabled {
 			cb(v)
 		}
 	})
@@ -557,7 +557,7 @@ func (u *UI) intranetCard(c *mu.Context, snap app.Snapshot, p palette) {
 			mu.Icon(c, iconWifi).FontSize(14).TextColor(p.Muted)
 			mu.Text(c, "局域网代理").FontSize(11.5).Grow(1).TextColor(p.Text)
 			v := snap.Settings.AllowLan
-			if mu.Switch(c, &v).Changed() {
+			if mu.Switch(c, &v).Label("局域网代理").Changed() {
 				u.patchSettings(func(s *app.Settings) { s.AllowLan = v })
 			}
 		})
@@ -748,7 +748,6 @@ func (u *UI) connectionsDashCard(c *mu.Context, snap app.Snapshot, p palette) {
 			feeds := []string{
 				fmt.Sprintf("%d 实时连接", snap.ConnectionsCount),
 				fmt.Sprintf("%d 最近请求", snap.RecentCount),
-				"DNS 查询",
 			}
 			for i, label := range feeds {
 				idx := i
@@ -787,13 +786,8 @@ func (u *UI) connectionsDashCard(c *mu.Context, snap app.Snapshot, p palette) {
 		case 0:
 			rows = append([]engine.Connection(nil), u.ctrl.Connections().Connections...)
 			sort.Slice(rows, func(i, j int) bool { return rows[i].Start > rows[j].Start })
-		case 1:
-			rows = u.ctrl.Recent()
 		default:
-			mu.Row(c).Grow(1).Center().Children(func() {
-				mu.Text(c, "暂无 DNS 查询记录").FontSize(11).TextColor(p.Muted)
-			})
-			return
+			rows = u.ctrl.Recent()
 		}
 		if len(rows) == 0 {
 			mu.Row(c).Grow(1).Center().Children(func() {
