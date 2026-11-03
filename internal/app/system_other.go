@@ -19,3 +19,10 @@ func relaunchElevated() error {
 func tunSupported() bool {
 	return false
 }
+
+// waitForPidArg names the argument that tells an instance to wait for the
+// one that started it to go.
+const waitForPidArg = "--wait-for-pid"
+
+// waitForProcess waits until the process with the pid is gone.
+func waitForProcess(pid int) {}

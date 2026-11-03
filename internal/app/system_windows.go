@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -14,6 +15,10 @@ import (
 )
 
 const internetSettingsKey = `Software\Microsoft\Windows\CurrentVersion\Internet Settings`
+
+// waitForPidArg names the argument that tells an instance to wait for the
+// one that started it to go.
+const waitForPidArg = "--wait-for-pid"
 
 const proxyBypass = `<local>;localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*`
 
@@ -59,6 +64,11 @@ func isElevated() bool {
 	return token.IsElevated()
 }
 
+// relaunchElevated starts the app again with administrator rights. It passes
+// the pid of this instance, so that the new one waits for it to go before it
+// takes the single instance lock: otherwise the new instance would find the
+// lock held, hand its command line over and quit, and this one would quit
+// right after, leaving nothing running.
 func relaunchElevated() error {
 	exe, err := os.Executable()
 	if err != nil {
@@ -67,7 +77,7 @@ func relaunchElevated() error {
 	verb, _ := syscall.UTF16PtrFromString("runas")
 	file, _ := syscall.UTF16PtrFromString(exe)
 	dir, _ := syscall.UTF16PtrFromString("")
-	arg, _ := syscall.UTF16PtrFromString("")
+	arg, _ := syscall.UTF16PtrFromString(fmt.Sprintf("%s=%d", waitForPidArg, os.Getpid()))
 	shell32 := syscall.NewLazyDLL("shell32.dll")
 	proc := shell32.NewProc("ShellExecuteW")
 	const swShownormal = 1
@@ -86,6 +96,20 @@ func relaunchElevated() error {
 		return errors.New("请求管理员权限失败")
 	}
 	return nil
+}
+
+// waitForProcess waits until the process with the pid is gone, at most a
+// minute: the instance that started this one is on its way out.
+func waitForProcess(pid int) {
+	if pid <= 0 {
+		return
+	}
+	handle, err := windows.OpenProcess(windows.SYNCHRONIZE, false, uint32(pid))
+	if err != nil {
+		return // it is already gone
+	}
+	defer windows.CloseHandle(handle)
+	_, _ = windows.WaitForSingleObject(handle, uint32(60*time.Second/time.Millisecond))
 }
 
 func tunSupported() bool {

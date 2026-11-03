@@ -77,6 +77,10 @@ var (
 func main() {
 	mygo.App.SetName("ZgoClash")
 	mygo.App.SetVersion(appVersion)
+	// An instance that was started as an administrator waits for the one
+	// that started it to go, or it would hand its command line over and
+	// quit, and nothing would be left running.
+	app.WaitForElevatedRestart()
 	if !mygo.App.RequestSingleInstanceLock() {
 		return
 	}
