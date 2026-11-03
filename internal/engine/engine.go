@@ -21,6 +21,7 @@ import (
 	C "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/hub"
 	"github.com/metacubex/mihomo/hub/executor"
+	"github.com/metacubex/mihomo/hub/route"
 	mihomolog "github.com/metacubex/mihomo/log"
 )
 
@@ -177,6 +178,7 @@ func (e *Engine) stopLocked() {
 	e.mu.Lock()
 	running := e.running
 	cancel := e.cancel
+	base := e.base
 	e.running = false
 	e.cancel = nil
 	e.runCtx = nil
@@ -193,6 +195,7 @@ func (e *Engine) stopLocked() {
 		cancel()
 	}
 	shutdownSafely()
+	closeControlPort(base)
 }
 
 // SetPolling starts or stops the traffic and connection polls the UI reads.
@@ -239,6 +242,29 @@ func parseSafely(cfg []byte, addr, secret string) (err error) {
 func shutdownSafely() {
 	defer func() { _ = recover() }()
 	executor.Shutdown()
+}
+
+// closeControlPort closes the core's control port. The core's own shutdown
+// closes the proxy listeners but leaves the port answering, so it would stay
+// bound after the core is stopped. The route package closes it in a goroutine,
+// so the wait is for the close to be done: the core may start again on the
+// same port right after, and the late close would take that one down.
+func closeControlPort(base string) {
+	if base == "" {
+		return
+	}
+	addr := strings.TrimPrefix(base, "http://")
+	addr = strings.TrimPrefix(addr, "https://")
+	route.ReCreateServer(&route.Config{})
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		conn, err := net.DialTimeout("tcp", addr, 200*time.Millisecond)
+		if err != nil {
+			return // the port is closed
+		}
+		_ = conn.Close()
+		time.Sleep(50 * time.Millisecond)
+	}
 }
 
 func waitForCore(client *http.Client, base, secret string, timeout time.Duration) error {
