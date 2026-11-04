@@ -1,0 +1,58 @@
+name: Release
+
+# A tag builds the Windows app and puts it on the release of that tag.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Windows amd64
+    # MyGo needs no cgo, so an Ubuntu runner builds the Windows app too.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Check the version
+        # The tag has to be the version of the configuration, or the build
+        # would be published under another version.
+        run: |
+          version=$(sed -n 's/.*version: *"\([^"]*\)".*/\1/p' mygo.config.ts | head -1)
+          echo "the tag is $GITHUB_REF_NAME, the version is $version"
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "the tag $GITHUB_REF_NAME does not match the version $version"
+            exit 1
+          fi
+
+      - name: Build
+        # -skip-installer leaves out the NSIS installer: the app is one
+        # exe, and NSIS is not needed to make it.
+        run: go tool mygo build -platform windows/amd64 -skip-installer
+
+      - name: Name the exe
+        run: |
+          mv bin/windows-amd64/ZgoClash.exe ZgoClash-windows-amd64.exe
+          ls -l ZgoClash-windows-amd64.exe
+
+      - name: Put it on the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" \
+              --title "$GITHUB_REF_NAME" --generate-notes
+          fi
+          gh release upload "$GITHUB_REF_NAME" ZgoClash-windows-amd64.exe --clobber
+
+      - name: Keep it as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZgoClash-windows-amd64
+          path: ZgoClash-windows-amd64.exe
