@@ -1,9 +1,10 @@
 name: Release
 
 # A tag builds the Windows app and puts it on the release of that tag.
+# The tag is the version of the core it holds, such as 1.19.33.1.
 on:
   push:
-    tags: ["v*"]
+    tags: ["*.*.*"]
 
 permissions:
   contents: write
@@ -26,7 +27,7 @@ jobs:
         run: |
           version=$(sed -n 's/.*version: *"\([^"]*\)".*/\1/p' mygo.config.ts | head -1)
           echo "the tag is $GITHUB_REF_NAME, the version is $version"
-          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+          if [ "$GITHUB_REF_NAME" != "$version" ]; then
             echo "the tag $GITHUB_REF_NAME does not match the version $version"
             exit 1
           fi

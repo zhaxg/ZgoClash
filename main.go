@@ -19,7 +19,7 @@ import (
 	appui "zgo-clash/internal/ui"
 )
 
-const appVersion = "1.0.0"
+const appVersion = "1.19.33.1"
 
 //go:embed resources/icon.png
 var appIcon []byte

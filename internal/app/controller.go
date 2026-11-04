@@ -21,7 +21,7 @@ import (
 const (
 	maxLogs    = 600
 	idleRecent = 20
-	appVersion = "1.0.0"
+	appVersion = "1.19.33.1"
 )
 
 // Controller is the app's model. Its methods are safe for the UI goroutine and

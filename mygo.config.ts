@@ -1,7 +1,7 @@
 export default {
   name: "ZgoClash",
   identifier: "app.zgo.clash",
-  version: "1.0.1",
+  version: "1.19.33.1",
   description: "A compact mihomo client for Windows",
   out: "bin",
   // MyGo embeds the exe icon from a square PNG only, so the artwork in
