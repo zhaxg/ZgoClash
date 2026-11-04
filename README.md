@@ -50,6 +50,21 @@ go tool mygo build      # 产物在 bin/windows-amd64/
 go tool mygo dev        # 开发模式，改动自动热重载
 ```
 
+核心要用 gVisor 网络栈，TUN 模式才有得用，所以构建要带上 `with_gvisor` 标签：
+
+```bash
+GOFLAGS=-tags=with_gvisor go tool mygo build
+```
+
+Windows 下用仓库里的脚本，它已经设好了这个标签：
+
+```powershell
+./build.ps1
+```
+
+打 tag（`v*`）会让 GitHub Actions 编译 Windows 版，把
+`ZgoClash-windows-amd64.exe` 放到该 tag 的 Release 上。
+
 ## 目录
 
 | 路径 | 内容 |

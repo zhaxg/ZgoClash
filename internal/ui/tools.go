@@ -108,15 +108,17 @@ func (u *UI) networkSection(c *mu.Context, snap app.Snapshot, p palette) {
 
 		stackDesc := "TUN 使用的网络栈"
 		u.settingRow(c, p, "TUN 栈", stackDesc, func() {
+			stacks := app.TunStacks()
+			names := make([]string, 0, len(stacks))
 			idx := 0
-			switch snap.Settings.TunStack {
-			case "system":
-				idx = 1
-			case "mixed":
-				idx = 2
+			for i, s := range stacks {
+				names = append(names, s.Name)
+				if s.Value == snap.Settings.TunStack {
+					idx = i
+				}
 			}
-			if mu.Segmented(c, &idx, "GVisor", "系统", "混合").Changed() {
-				value := []string{"gvisor", "system", "mixed"}[idx]
+			if mu.Segmented(c, &idx, names...).Changed() {
+				value := stacks[idx].Value
 				u.patchSettings(func(s *app.Settings) { s.TunStack = value })
 			}
 		})

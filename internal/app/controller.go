@@ -478,7 +478,7 @@ func (c *Controller) startLocked() error {
 	}
 
 	if settings.SystemProxy {
-		if err := setSystemProxy(true, fmt.Sprintf("127.0.0.1:%d", settings.MixedPort)); err != nil {
+		if err := applySystemProxy(true, fmt.Sprintf("127.0.0.1:%d", settings.MixedPort)); err != nil {
 			c.setProxySetting(false)
 			c.mu.Lock()
 			c.lastErr = err.Error()
@@ -522,8 +522,10 @@ func (c *Controller) stopLocked(clearProxy bool) {
 	c.traffic = engine.Traffic{}
 	c.mu.Unlock()
 	if clearProxy {
-		_ = setSystemProxy(false, "")
-		c.setProxySetting(false)
+		// The proxy in Windows goes away with the core, but the choice the
+		// user made stays: it comes back with the core, and it is not
+		// forgotten by a restart.
+		_ = applySystemProxy(false, "")
 	}
 	c.changed()
 }
@@ -552,6 +554,10 @@ func (c *Controller) setProxySetting(enabled bool) {
 	_ = c.store.SaveSettings(settings)
 }
 
+// applySystemProxy writes the proxy of Windows. The test replaces it, to
+// keep the registry of the machine out of the way.
+var applySystemProxy = setSystemProxy
+
 // SetSystemProxy applies or clears the Windows Internet proxy.
 func (c *Controller) SetSystemProxy(enabled bool) error {
 	c.lifeMu.Lock()
@@ -570,14 +576,14 @@ func (c *Controller) SetSystemProxy(enabled bool) error {
 				return err
 			}
 		}
-		if err := setSystemProxy(true, fmt.Sprintf("127.0.0.1:%d", port)); err != nil {
+		if err := applySystemProxy(true, fmt.Sprintf("127.0.0.1:%d", port)); err != nil {
 			c.setProxySetting(false)
 			c.changed()
 			return err
 		}
 		c.setProxySetting(true)
 	} else {
-		if err := setSystemProxy(false, ""); err != nil {
+		if err := applySystemProxy(false, ""); err != nil {
 			return err
 		}
 		c.setProxySetting(false)
@@ -682,7 +688,7 @@ func (c *Controller) UpdateSettings(next Settings) error {
 	} else if next.SystemProxy != prev.SystemProxy {
 		if next.SystemProxy {
 			if running {
-				if err := setSystemProxy(true, fmt.Sprintf("127.0.0.1:%d", next.MixedPort)); err != nil {
+				if err := applySystemProxy(true, fmt.Sprintf("127.0.0.1:%d", next.MixedPort)); err != nil {
 					applyErr = err
 					c.setProxySetting(false)
 				}
@@ -690,7 +696,7 @@ func (c *Controller) UpdateSettings(next Settings) error {
 				applyErr = err
 			}
 		} else {
-			if err := setSystemProxy(false, ""); err != nil {
+			if err := applySystemProxy(false, ""); err != nil {
 				applyErr = err
 			}
 		}

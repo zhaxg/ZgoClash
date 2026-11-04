@@ -238,7 +238,11 @@ func (u *UI) startToggle(c *mu.Context, snap app.Snapshot, p palette) {
 	if snap.Running {
 		target = 1
 	}
-	el := mu.ButtonBase(c).Size(size, size).Label("启动核心").Key("core-toggle")
+	label := "启动核心"
+	if snap.Running {
+		label = "停止核心"
+	}
+	el := mu.ButtonBase(c).Size(size, size).Label(label).Key("core-toggle")
 	progress := el.AnimateTo("morph", target, mu.Animation{Duration: 450 * time.Millisecond, Ease: easeOutBack})
 	// FlClash fills the button with the primary colour in both states, and
 	// only greys it when there is no profile to run.
@@ -508,6 +512,9 @@ func (u *UI) takeoverTile(c *mu.Context, snap app.Snapshot, p palette, systemPro
 	on := snap.Settings.Tun
 	enabled := snap.CanTun
 	sub := "已关闭"
+	if on {
+		sub = "已开启"
+	}
 	cb := func(v bool) { u.run("tun", func() error { return u.ctrl.SetTun(v) }, nil) }
 	if systemProxy {
 		title, icon = "系统代理", iconShuffle

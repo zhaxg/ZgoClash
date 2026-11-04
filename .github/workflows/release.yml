@@ -34,6 +34,10 @@ jobs:
       - name: Build
         # -skip-installer leaves out the NSIS installer: the app is one
         # exe, and NSIS is not needed to make it.
+        # The with_gvisor tag puts the gVisor network stack in the core, so
+        # the TUN mode works with the stack the app asks for.
+        env:
+          GOFLAGS: -tags=with_gvisor
         run: go tool mygo build -platform windows/amd64 -skip-installer
 
       - name: Name the exe

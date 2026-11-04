@@ -115,6 +115,8 @@ func normalizeSettings(v Settings) Settings {
 	default:
 		v.TunStack = d.TunStack
 	}
+	// A build without the gVisor stack cannot use it, nor the mixed one.
+	v.TunStack = normalizeTunStack(v.TunStack)
 	if strings.TrimSpace(v.TestURL) == "" {
 		v.TestURL = d.TestURL
 	}
